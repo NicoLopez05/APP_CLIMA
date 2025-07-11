@@ -54,7 +54,14 @@ jobs:
 
       - name: Wait for servers to start
         run: sleep 05
+        
 
+
+      - name: Check chromedriver permissions
+        run: |
+          ls -l /usr/bin/chromedriver
+          which chromedriver
+          
       - name: Run tests
         working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
         run: |
