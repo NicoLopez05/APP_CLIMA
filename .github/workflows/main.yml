@@ -19,19 +19,15 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install chromedriver
+      - name: Install ChromeDriver
         run: |
-          sudo apt update
-          sudo apt install -y chromium-browser chromium-chromedriver
-          echo "Chromedriver installed at: $(which chromedriver || true)"
-          if ! command -v chromedriver >/dev/null 2>&1; then
-            if [ -f /usr/lib/chromium-browser/chromedriver ]; then
-              sudo ln -sf /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
-            elif [ -f /usr/lib/chromium/chromedriver ]; then
-              sudo ln -sf /usr/lib/chromium/chromedriver /usr/bin/chromedriver
-            fi
-          fi
-
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          chmod +x chromedriver
+          sudo mv chromedriver /usr/local/bin/
+              
       - name: Install dependencies
         working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
         run: |
