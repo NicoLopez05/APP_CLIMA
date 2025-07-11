@@ -22,19 +22,14 @@ jobs:
       - name: Install compatible Google Chrome version
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable=138.0.7204.96-1
-      
-      - name: Install ChromeDriver for version 138
-        run: |
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_138")
+          sudo apt-get install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
           wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver.zip
           chmod +x chromedriver
           sudo mv chromedriver /usr/local/bin/
+
 
 
               
