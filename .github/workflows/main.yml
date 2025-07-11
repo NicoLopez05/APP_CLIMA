@@ -19,49 +19,31 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Add Google Chrome repository
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-      
-      - name: Download and Install Google Chrome 137
-        run: |
-          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_137.0.7283.111-1_amd64.deb
-          sudo apt install -y ./google-chrome-stable_137.0.7283.111-1_amd64.deb
-          sudo apt-mark hold google-chrome-stable
+      - name: Setup Google Chrome (headless)
+        uses: browser-actions/setup-chrome@v1
 
-      
-      - name: Install ChromeDriver 137
-        run: |
-          # Descarga la última release de la rama 137
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_137")
-          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip chromedriver.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/
+      - name: Verificar versión de Chrome
+        run: google-chrome --version
 
 
 
 
               
       - name: Install dependencies
-        working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
+        working-directory: AGRO_CLIMA_APP/
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Start FastAPI backend
-        working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
+        working-directory: AGRO_CLIMA_APP/
         run: |
           nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
         env:
           PYTHONPATH: .
 
       - name: Start frontend
-        working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
+        working-directory: AGRO_CLIMA_APP/
         run: |
           nohup python frontend.py &
         env:
@@ -78,6 +60,6 @@ jobs:
           which chromedriver
           
       - name: Run tests
-        working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
+        working-directory: AGRO_CLIMA_APP/
         run: |
           python -m pytest --cov=app tests/
