@@ -48,3 +48,5 @@ def update_sensor(db: Session, sensor_id: int, sensor_update: schemas.SensorUpda
     db.commit()
     db.refresh(sensor)
     return sensor
+
+    

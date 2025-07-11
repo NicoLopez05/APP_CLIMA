@@ -35,7 +35,7 @@ def update_sensor(sensor_id: int, sensor: schemas.SensorCreate, db: Session = De
     db_sensor = crud.get_sensor(db, sensor_id)
     if db_sensor is None:
         raise HTTPException(status_code=404, detail="Sensor not found")
-    for key, value in sensor.dict().items():
+    for key, value in sensor.model_dump().items():
         setattr(db_sensor, key, value)
     db.commit()
     db.refresh(db_sensor)

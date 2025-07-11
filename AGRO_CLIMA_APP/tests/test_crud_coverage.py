@@ -56,5 +56,21 @@ def test_delete_sensor(db: Session):
         assert deleted is True or deleted is not None
 
 
+def test_update_sensor_no_encontrado():
+    from app.crud import update_sensor
+    from app.schemas import SensorUpdate
+    from app.database import SessionLocal
+    db = SessionLocal()
 
+    sensor_update = SensorUpdate(
+        nombre="NuevoNombre",
+        tipo="Temp",
+        ubicacion="XYZ",
+        zona="B",
+        cultivo="Maíz"
+    )
+
+    # ID inexistente
+    result = update_sensor(db, 9999, sensor_update)
+    assert result is None
 
