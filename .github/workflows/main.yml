@@ -27,12 +27,12 @@ jobs:
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
       
-      - name: Install Google Chrome 137
+      - name: Download and Install Google Chrome 137
         run: |
-          # Instala versión específica
-          sudo apt-get install -y google-chrome-stable=137.0.7283.111-1
-          # Evita que Chrome se actualice automáticamente
+          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_137.0.7283.111-1_amd64.deb
+          sudo apt install -y ./google-chrome-stable_137.0.7283.111-1_amd64.deb
           sudo apt-mark hold google-chrome-stable
+
       
       - name: Install ChromeDriver 137
         run: |
