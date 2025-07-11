@@ -17,12 +17,44 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
-      - name: Install pytest
+      - name: Install dependencies
         run: |
-          pip install pytest
+          pip install --upgrade pip
+          pip install -r AGRO_CLIMA_APP/requirements.txt
 
-      - name: Run tests in tests folder
+      - name: Run tests in AGRO_CLIMA_APP
+        working-directory: ./AGRO_CLIMA_APP
         run: |
-          pytest tests
+          pytest --cov=app tests/
+name: Python CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r AGRO_CLIMA_APP/requirements.txt
+
+      - name: Run tests in AGRO_CLIMA_APP
+        working-directory: ./AGRO_CLIMA_APP
+        run: |
+          pytest --cov=app tests/
