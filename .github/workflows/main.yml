@@ -20,28 +20,12 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
+        working-directory: AGRO_CLIMA_APP
         run: |
           pip install --upgrade pip
-          pip install fastapi
-          pip install uvicorn
-          pip install dash
-          pip install dash-bootstrap-components
-          pip install pandas
-          pip install httpx
-          pip install sqlalchemy
-          pip install alembic
-          pip install passlib[bcrypt]
-          pip install python-dotenv    
-          pip install selenium
-          pip install requests
-          pip install pytest
-          pip install pytest-cov
-          pip install pytest-asyncio
-          pip install pylint
-          pip install black
+          pip install -r requirements.txt
+
       - name: Run tests
         working-directory: AGRO_CLIMA_APP
         run: |
-          python -m pytest --cov=app ./tests/
-
-
+          python -m pytest --cov=app tests/
