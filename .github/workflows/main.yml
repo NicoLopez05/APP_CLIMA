@@ -34,8 +34,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           sudo apt update
-          sudo apt install -y chromium-chromedriver
-          sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
 
       - name: Start FastAPI backend
         working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
