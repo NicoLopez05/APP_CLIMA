@@ -20,12 +20,10 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        working-directory: ./AGRO_CLIMA_APP
         run: |
           pip install --upgrade pip
+          pip install -r AGRO_CLIMA_APP/requirements.txt
 
-      - name: Run tests in AGRO_CLIMA_APP
-        working-directory: ./AGRO_CLIMA_APP
+      - name: Run tests
         run: |
-          python -m pytest --cov=app tests/
-
+          python -m pytest --cov=AGRO_CLIMA_APP/app AGRO_CLIMA_APP/tests/
