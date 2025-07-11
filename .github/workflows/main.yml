@@ -27,4 +27,5 @@ jobs:
       - name: Run tests in AGRO_CLIMA_APP
         working-directory: ./AGRO_CLIMA_APP
         run: |
-          pytest --cov=app tests/
+          python -m pytest --cov=app tests/
+
