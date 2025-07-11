@@ -19,7 +19,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 def create_sensor(db: Session, sensor: schemas.SensorCreate):
-    db_sensor = models.Sensor(**sensor.dict())
+    db_sensor = models.Sensor(**sensor.model_dump())
     db.add(db_sensor)
     db.commit()
     db.refresh(db_sensor)

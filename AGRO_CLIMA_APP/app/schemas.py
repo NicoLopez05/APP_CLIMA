@@ -1,5 +1,7 @@
 # app/schemas.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+# --- Usuarios ---
 
 class UserCreate(BaseModel):
     username: str
@@ -9,8 +11,9 @@ class UserOut(BaseModel):
     id: int
     username: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+# --- Sensores ---
 
 class SensorBase(BaseModel):
     nombre: str
@@ -26,8 +29,9 @@ class SensorCreate(SensorBase):
 
 class SensorOut(SensorBase):
     id: int
-    class Config:
-        orm_mode = True
+
+    model_config = ConfigDict(from_attributes=True)
+
 class SensorUpdate(BaseModel):
     nombre: str
     tipo: str

@@ -4,6 +4,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from .. import crud
 from ..deps import get_db
+from ..crud import get_user_by_username, pwd_context
+from .. import schemas
 
 router = APIRouter()
 
@@ -15,10 +17,8 @@ def register(user: crud.schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
 
 @router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = crud.get_user_by_username(db, form_data.username)
-    if not user or not crud.pwd_context.verify(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas")
-
-    # Puedes reemplazar por JWT real
-    return {"access_token": "fake-token", "token_type": "bearer"}
+def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_username(db, user.username)
+    if not db_user or not crud.pwd_context.verify(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+    return {"access_token": "fake-token", "token_type": "bearer"}  # estándar OAuth2

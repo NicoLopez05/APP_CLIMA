@@ -204,7 +204,7 @@ def login_user(login_clicks, username, password):
         return dash.no_update, dbc.Alert("Completa usuario y contraseña", color="danger")
     resp = requests.post(f"{API_URL}/auth/login", json={"username": username, "password": password})
     if resp.status_code == 200:
-        return {"logged": True, "token": resp.json().get("token", "")}, None
+        return {"logged": True, "token": resp.json().get("access_token", "")}, None
     else:
         return dash.no_update, dbc.Alert("Login inválido", color="danger")
 

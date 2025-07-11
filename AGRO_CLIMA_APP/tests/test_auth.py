@@ -4,7 +4,7 @@ from app.main import app
 client = TestClient(app)
 
 def test_login_fail():
-    response = client.post("/auth/login", data={
+    response = client.post("/auth/login", json={
         "username": "wrong",
         "password": "fail",
         "grant_type": "password"
@@ -21,7 +21,7 @@ def test_login_success(monkeypatch):
     monkeypatch.setattr(auth.crud, "get_user_by_username", lambda db, username: DummyUser())
     monkeypatch.setattr(auth.crud.pwd_context, "verify", lambda plain, hashed: True)
 
-    response = client.post("/auth/login", data={
+    response = client.post("/auth/login", json={
         "username": "admin",
         "password": "admin",
         "grant_type": "password"
