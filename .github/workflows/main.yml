@@ -35,6 +35,7 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install webdriver_manager
+          pip install python-multipart
 
       - name: Start FastAPI backend
         working-directory: AGRO_CLIMA_APP/
