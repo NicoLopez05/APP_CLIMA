@@ -40,5 +40,7 @@ jobs:
           pip install pylint
           pip install black
       - name: Run tests
+        working-directory: AGRO_CLIMA_APP
         run: |
-          python -m pytest --cov=AGRO_CLIMA_APP AGRO_CLIMA_APP/tests/
+          python -m pytest --cov=app tests/
+
