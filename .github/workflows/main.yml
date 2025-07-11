@@ -18,6 +18,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          
+      - name: Install chromedriver
+        run: |
+          sudo apt update
+          sudo apt install -y chromium-chromedriver
+          # SOLO crear symlink si no existe
+          if [ ! -f /usr/bin/chromedriver ]; then
+            sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+          fi
 
       - name: Install dependencies
         working-directory: AGRO_CLIMA_APP/AGRO_CLIMA_APP
