@@ -1,10 +1,21 @@
 fastapi
 uvicorn
+dash
+dash-bootstrap-components
+pandas
+httpx
 sqlalchemy
 alembic
-pydantic
 passlib[bcrypt]
 python-dotenv
+
+# Additional libraries
+selenium
+requests
+
+# Tools for testing & formatting
 pytest
 pytest-cov
-httpx
+pytest-asyncio
+pylint
+black
