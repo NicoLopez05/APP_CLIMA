@@ -1,5 +1,3 @@
-# tests/test_crud_coverage.py
-
 from app import crud, models, schemas
 from app.database import SessionLocal
 from sqlalchemy.orm import Session
@@ -70,7 +68,7 @@ def test_update_sensor_no_encontrado():
         cultivo="Maíz"
     )
 
-    # ID inexistente
+    
     result = update_sensor(db, 9999, sensor_update)
     assert result is None
 

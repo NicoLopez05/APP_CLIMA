@@ -10,7 +10,6 @@ def test_title():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # Usamos webdriver-manager para descargar el chromedriver automáticamente
     service = Service(ChromeDriverManager().install())
 
     driver = webdriver.Chrome(service=service, options=options)

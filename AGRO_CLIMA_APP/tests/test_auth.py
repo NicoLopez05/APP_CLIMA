@@ -16,7 +16,7 @@ def test_login_success(monkeypatch):
 
     class DummyUser:
         username = "admin"
-        hashed_password = "$2b$12$1234567890123456789012"  # dummy bcrypt hash
+        hashed_password = "$2b$12$1234567890123456789012"  
 
     monkeypatch.setattr(auth.crud, "get_user_by_username", lambda db, username: DummyUser())
     monkeypatch.setattr(auth.crud.pwd_context, "verify", lambda plain, hashed: True)

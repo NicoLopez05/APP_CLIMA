@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
-#import pytest
+
 client = TestClient(app)
 
 # Datos de ejemplo
@@ -58,12 +58,6 @@ def test_delete_sensor():
 def test_get_sensor_not_found():
     response = client.get("/sensores/9999")
     assert response.status_code == 404
-
-#@pytest.mark.xfail(reason="Validación de duplicados no implementada aún")
-#def test_create_sensor_duplicado():
-#    client.post("/sensores/", json=sensor_data)
-#    response = client.post("/sensores/", json=sensor_data)
-#    assert response.status_code == 400
 
 def test_update_sensor_not_found():
     response = client.put("/sensores/9999", json=sensor_update_data)

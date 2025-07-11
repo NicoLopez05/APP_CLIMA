@@ -379,8 +379,7 @@ def save_edit_sensor(n, sensor, nombre, ubicacion, tipo, activo, alerta, zona, c
         "zona": zona,
         "cultivo": cultivo
     }
-    # Actualización: usa el endpoint del backend, debes agregar PUT o PATCH para editar.
-    # Si aún no tienes ese endpoint, puedes crearlo.
+   
     # Aquí se asume PATCH.
     sensor_id = sensor["id"]
     resp = requests.put(f"{API_URL}/sensores/{sensor_id}", json=payload)

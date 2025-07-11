@@ -1,7 +1,4 @@
-# app/schemas.py
 from pydantic import BaseModel, ConfigDict
-
-# --- Usuarios ---
 
 class UserCreate(BaseModel):
     username: str
@@ -12,8 +9,6 @@ class UserOut(BaseModel):
     username: str
 
     model_config = ConfigDict(from_attributes=True)
-
-# --- Sensores ---
 
 class SensorBase(BaseModel):
     nombre: str
