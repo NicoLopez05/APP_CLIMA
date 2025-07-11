@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-import os
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 def test_title():
@@ -10,9 +10,8 @@ def test_title():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # Ruta absoluta al chromedriver
-    driver_path = os.path.abspath("chromedriver.exe")
-    service = Service(driver_path)
+    # Usamos webdriver-manager para descargar el chromedriver automáticamente
+    service = Service(ChromeDriverManager().install())
 
     driver = webdriver.Chrome(service=service, options=options)
 

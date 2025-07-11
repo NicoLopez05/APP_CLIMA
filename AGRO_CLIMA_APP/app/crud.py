@@ -2,6 +2,8 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 from passlib.context import CryptContext
+from app.schemas import SensorUpdate
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -34,4 +36,15 @@ def delete_sensor(db: Session, sensor_id: int):
     if sensor:
         db.delete(sensor)
         db.commit()
+    return sensor
+def update_sensor(db: Session, sensor_id: int, sensor_update: schemas.SensorUpdate):
+    sensor = db.query(models.Sensor).filter(models.Sensor.id == sensor_id).first()
+    if not sensor:
+        return None
+
+    for field, value in sensor_update.model_dump().items():
+        setattr(sensor, field, value)
+    
+    db.commit()
+    db.refresh(sensor)
     return sensor

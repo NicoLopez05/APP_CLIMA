@@ -28,3 +28,9 @@ class SensorOut(SensorBase):
     id: int
     class Config:
         orm_mode = True
+class SensorUpdate(BaseModel):
+    nombre: str
+    tipo: str
+    ubicacion: str
+    zona: str
+    cultivo: str
