@@ -1,10 +1,12 @@
 name: Python CI
 
 on:
+  workflow_dispatch:  # esto habilita el botón "Run workflow" en GitHub
   push:
     branches: [main]
   pull_request:
     branches: [main]
+    
 
 jobs:
   build:
