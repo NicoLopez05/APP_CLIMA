@@ -1,0 +1,31 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Entorno virtual
+venv/
+.env
+
+# Archivos generados por setuptools
+dist/
+build/
+*.egg-info/
+
+# Archivos temporales
+*.log
+*.sqlite3
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Coverage
+.coverage
+htmlcov/
+.cache/
+
+# Archivos de test
+.noseids
+
+# Selenium
+selenium.log
