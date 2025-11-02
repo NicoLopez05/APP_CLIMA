@@ -1,0 +1,31 @@
+VENV:
+cd Laos_Emergency_v3\Laos_Emergency_v3\AGRO_CLIMA_APP
+py -m venv .venv
+.\.venv\Scripts\Activate
+
+INSTALAR DEPENDENCIAS:
+pip install --upgrade pip
+pip install -r requirements.txt
+
+
+
+
+BACKEND-ALEMBIC:
+TABLAS:
+alembic upgrade head
+
+INICIAR:
+uvicorn app.main:app --reload --port 8000
+
+FRONTEND:EN OTRA TERMINAL CON VENV ACTIVO
+python frontend.py
+
+
+Iniciar pruebas:
+pytest --cov=app --cov-report=term-missing --cov-report=xml
+
+GIT:
+git add .
+git commit -m "COMENTARIO"
+git push
+si es proyecto nuevo hacer git pull antes
