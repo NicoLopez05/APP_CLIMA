@@ -1,10 +1,13 @@
+import os
 import dash
 from dash import dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import requests
 import plotly.express as px
 
-API_URL = "http://127.0.0.1:8000"
+# ======== Config API (para Docker) ========
+# Prioridad: API_URL > BACKEND_URL > valor por defecto (nombre del servicio docker)
+API_URL = os.getenv("API_URL") or os.getenv("BACKEND_URL") or "http://agro_backend:8000"
 
 app = dash.Dash(
     __name__,
@@ -15,8 +18,9 @@ app = dash.Dash(
 app.layout = dbc.Container([
     dcc.Store(id="auth-status", data={"logged": False, "token": ""}),
     dcc.Store(id="refresh-trigger", data=0),
-    dcc.Store(id="sensor-edit", data=None),
+    dcc.Store(id="sensor-edit", data=None),   # Aquí guardamos el sensor seleccionado para edición
     html.Div(id="page-content"),
+
     # Modal para editar sensor
     dbc.Modal(
         [
@@ -64,6 +68,7 @@ app.layout = dbc.Container([
     )
 ], fluid=True)
 
+
 def login_layout():
     return dbc.Row([
         dbc.Col([
@@ -76,6 +81,7 @@ def login_layout():
         ], width=4)
     ], justify="center")
 
+
 def crud_layout():
     return dbc.Container([
         dbc.Row([
@@ -86,7 +92,6 @@ def crud_layout():
             dbc.Col(dbc.Button("Actualizar", id="refresh-btn", color="info", className="mb-2"), width=3),
             dbc.Col(html.Div(id="sensor-table-alert"), width=9)
         ]),
-        # Tabla
         dash_table.DataTable(
             id="tabla-sensores",
             columns=[
@@ -132,41 +137,23 @@ def crud_layout():
                     ), width=8),
             ], className="mt-2"),
             dbc.Row([
-                dbc.Col(
-                    dbc.Checkbox(
-                        id="activo-sensor",
-                        value=True,
-                        className="me-2"
-                    ),
-                    width="auto"
-                ),
+                dbc.Col(dbc.Checkbox(id="activo-sensor", value=True, className="me-2"), width="auto"),
                 dbc.Col(html.Label("Activo"), width="auto"),
-                dbc.Col(
-                    dbc.Checkbox(
-                        id="alerta-sensor",
-                        value=False,
-                        className="me-2"
-                    ),
-                    width="auto"
-                ),
+                dbc.Col(dbc.Checkbox(id="alerta-sensor", value=False, className="me-2"), width="auto"),
                 dbc.Col(html.Label("Alertas habilitadas"), width="auto"),
             ], className="mt-2"),
             dbc.Row([
                 dbc.Col(
                     dcc.Dropdown(
                         id="zona-sensor",
-                        options=[
-                            {"label": z, "value": z} for z in ["Norte", "Centro", "Sur"]
-                        ],
+                        options=[{"label": z, "value": z} for z in ["Norte", "Centro", "Sur"]],
                         value="Norte",
                         clearable=False
                     ), width=4),
                 dbc.Col(
                     dcc.Dropdown(
                         id="cultivo-sensor",
-                        options=[
-                            {"label": c, "value": c} for c in ["Maíz", "Trigo", "Soja"]
-                        ],
+                        options=[{"label": c, "value": c} for c in ["Maíz", "Trigo", "Soja"]],
                         value="Maíz",
                         clearable=False
                     ), width=4),
@@ -181,6 +168,7 @@ def crud_layout():
         dcc.Graph(id="sensor-cultivo-bar"),
     ], fluid=True)
 
+
 @app.callback(
     Output("page-content", "children"),
     Input("auth-status", "data"),
@@ -188,8 +176,8 @@ def crud_layout():
 def render_page(auth_status):
     if auth_status.get("logged"):
         return crud_layout()
-    else:
-        return login_layout()
+    return login_layout()
+
 
 @app.callback(
     Output("auth-status", "data", allow_duplicate=True),
@@ -205,8 +193,7 @@ def login_user(login_clicks, username, password):
     resp = requests.post(f"{API_URL}/auth/login", json={"username": username, "password": password})
     if resp.status_code == 200:
         return {"logged": True, "token": resp.json().get("access_token", "")}, None
-    else:
-        return dash.no_update, dbc.Alert("Login inválido", color="danger")
+    return dash.no_update, dbc.Alert("Login inválido", color="danger")
 
 
 @app.callback(
@@ -229,10 +216,10 @@ def register_user(n, username, password):
     if not username or not password:
         return dbc.Alert("Completa usuario y contraseña para registrar", color="warning")
     resp = requests.post(f"{API_URL}/auth/register", json={"username": username, "password": password})
-    if resp.status_code == 200:
+    if resp.status_code in (200, 201):
         return dbc.Alert("Registro exitoso. Ahora puedes hacer login.", color="success")
-    else:
-        return dbc.Alert("Usuario ya existe o error al registrar.", color="danger")
+    return dbc.Alert("Usuario ya existe o error al registrar.", color="danger")
+
 
 @app.callback(
     Output("tabla-sensores", "data"),
@@ -248,27 +235,22 @@ def refresh_table(n, refresh_trigger):
     fig_tipo = px.bar(title="No hay sensores para mostrar")
     fig_cultivo = px.bar(title="No hay sensores para mostrar")
     if resp.status_code == 200:
-        data = resp.json()
+        data = resp.json() or []
         if data:
             for row in data:
                 row["editar"] = f"[✏️](#edit-{row['id']})"
                 row["eliminar"] = f"[🗑️](#del-{row['id']})"
-            # Gráfico de sensores por tipo
             tipo_counts = {}
             cultivo_counts = {}
             for s in data:
                 tipo_counts[s["tipo"]] = tipo_counts.get(s["tipo"], 0) + 1
                 cultivo_counts[s["cultivo"]] = cultivo_counts.get(s["cultivo"], 0) + 1
-            fig_tipo = px.bar(
-                x=list(tipo_counts.keys()), y=list(tipo_counts.values()),
-                labels={'x': 'Tipo de sensor', 'y': 'Cantidad'},
-                title="Cantidad de sensores por tipo"
-            )
-            fig_cultivo = px.bar(
-                x=list(cultivo_counts.keys()), y=list(cultivo_counts.values()),
-                labels={'x': 'Tipo de cultivo', 'y': 'Cantidad'},
-                title="Cantidad de sensores por tipo de cultivo"
-            )
+            fig_tipo = px.bar(x=list(tipo_counts.keys()), y=list(tipo_counts.values()),
+                              labels={'x': 'Tipo de sensor', 'y': 'Cantidad'},
+                              title="Cantidad de sensores por tipo")
+            fig_cultivo = px.bar(x=list(cultivo_counts.keys()), y=list(cultivo_counts.values()),
+                                 labels={'x': 'Tipo de cultivo', 'y': 'Cantidad'},
+                                 title="Cantidad de sensores por tipo de cultivo")
     return data, fig_tipo, fig_cultivo
 
 
@@ -294,21 +276,22 @@ def add_sensor(n, nombre, tipo, ubicacion, activo, alerta, zona, cultivo, refres
         "nombre": nombre,
         "tipo": tipo,
         "ubicacion": ubicacion,
-        "activo": activo or False,
-        "alertas": alerta or False,
+        "activo": bool(activo),
+        "alertas": bool(alerta),
         "zona": zona,
         "cultivo": cultivo
     }
     resp = requests.post(f"{API_URL}/sensores/", json=payload)
     if resp.status_code == 200:
         return dbc.Alert("Sensor registrado correctamente.", color="success"), refresh_data + 1
-    else:
-        return dbc.Alert("Error al registrar sensor.", color="danger"), refresh_data
+    return dbc.Alert("Error al registrar sensor.", color="danger"), refresh_data
 
-# Eliminar sensor
+
+# Eliminar / Editar sensor (ahora también actualiza el Store 'sensor-edit')
 @app.callback(
     Output("refresh-trigger", "data"),
     Output("sensor-table-alert", "children"),
+    Output("sensor-edit", "data", allow_duplicate=True),
     Input("tabla-sensores", "active_cell"),
     State("tabla-sensores", "data"),
     State("refresh-trigger", "data"),
@@ -319,20 +302,24 @@ def delete_edit_sensor(active_cell, data, refresh_data):
         raise dash.exceptions.PreventUpdate
     column = active_cell.get("column_id")
     row_idx = active_cell.get("row")
+    if row_idx is None or row_idx >= len(data):
+        raise dash.exceptions.PreventUpdate
+
     if column == "eliminar":
         sensor_id = data[row_idx]["id"]
         resp = requests.delete(f"{API_URL}/sensores/{sensor_id}")
         if resp.status_code == 200:
-            return refresh_data + 1, dbc.Alert("Sensor eliminado.", color="success")
-        else:
-            return refresh_data, dbc.Alert("Error al eliminar sensor.", color="danger")
-    elif column == "editar":
-        # Guarda datos para el modal de edición
+            return refresh_data + 1, dbc.Alert("Sensor eliminado.", color="success"), dash.no_update
+        return refresh_data, dbc.Alert("Error al eliminar sensor.", color="danger"), dash.no_update
+
+    if column == "editar":
         sensor = data[row_idx]
-        return dash.no_update, dcc.Store(id="sensor-edit", data=sensor)
+        return refresh_data, dash.no_update, sensor
+
     raise dash.exceptions.PreventUpdate
 
-# Abrir modal de edición cuando se setea sensor-edit
+
+# Abrir modal de edición cuando cambia el store sensor-edit
 @app.callback(
     Output("edit-modal", "is_open"),
     Output("edit-nombre", "value"),
@@ -343,13 +330,13 @@ def delete_edit_sensor(active_cell, data, refresh_data):
     Output("edit-zona", "value"),
     Output("edit-cultivo", "value"),
     Input("sensor-edit", "data"),
-    State("edit-modal", "is_open"),
     prevent_initial_call=True,
 )
-def open_edit_modal(sensor, is_open):
-    if sensor is None:
+def open_edit_modal(sensor):
+    if not sensor:
         return False, None, None, None, None, None, None, None
     return True, sensor["nombre"], sensor["ubicacion"], sensor["tipo"], sensor["activo"], sensor["alertas"], sensor["zona"], sensor["cultivo"]
+
 
 # Guardar cambios del sensor editado
 @app.callback(
@@ -374,19 +361,19 @@ def save_edit_sensor(n, sensor, nombre, ubicacion, tipo, activo, alerta, zona, c
         "nombre": nombre,
         "tipo": tipo,
         "ubicacion": ubicacion,
-        "activo": activo or False,
-        "alertas": alerta or False,
+        "activo": bool(activo),
+        "alertas": bool(alerta),
         "zona": zona,
         "cultivo": cultivo
     }
-   
-    # Aquí se asume PATCH.
     sensor_id = sensor["id"]
     resp = requests.put(f"{API_URL}/sensores/{sensor_id}", json=payload)
     if resp.status_code == 200:
         return refresh_data + 1, False
-    else:
-        return refresh_data, False
+    return refresh_data, False
 
+
+# ======== Run (solo esto al final) ========
 if __name__ == "__main__":
-    app.run(debug=True, port=8058)
+    port = int(os.getenv("PORT", "8058"))  # debe coincidir con docker-compose (ports)
+    app.run(host="0.0.0.0", port=port, debug=False)

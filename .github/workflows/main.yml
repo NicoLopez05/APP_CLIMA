@@ -1,12 +1,11 @@
 name: Python CI
 
 on:
-  workflow_dispatch:  # esto habilita el botón "Run workflow" en GitHub
+  workflow_dispatch:  # habilita botón "Run workflow" en GitHub
   push:
     branches: [main]
   pull_request:
     branches: [main]
-    
 
 jobs:
   build:
@@ -21,16 +20,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Instala Google Chrome estable en el runner
       - name: Setup Google Chrome (headless)
         uses: browser-actions/setup-chrome@v1
 
       - name: Verificar versión de Chrome
         run: google-chrome --version
 
-
-
-
-              
       - name: Install dependencies
         working-directory: AGRO_CLIMA_APP/
         run: |
@@ -40,31 +36,65 @@ jobs:
           pip install webdriver_manager
           pip install python-multipart
 
+      # Backend FastAPI en 127.0.0.1:8000
       - name: Start FastAPI backend
         working-directory: AGRO_CLIMA_APP/
+        env:
+          PYTHONPATH: .
         run: |
           nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
-        env:
-          PYTHONPATH: .
 
+      # Frontend Dash en 127.0.0.1:8058
       - name: Start frontend
         working-directory: AGRO_CLIMA_APP/
-        run: |
-          nohup python frontend.py &
         env:
           PYTHONPATH: .
+          PORT: "8058"                  # <-- puerto frontend
+          API_URL: "http://127.0.0.1:8000"   # <-- para que el frontend llame al backend local
+        run: |
+          nohup python frontend.py &
 
-      - name: Wait for servers to start
-        run: sleep 05
-        
+      # Espera a que ambos servicios estén arriba (health checks)
+      - name: Esperar BACKEND (http://127.0.0.1:8000/openapi.json)
+        run: |
+          for i in {1..40}; do
+            if curl -sSf http://127.0.0.1:8000/openapi.json > /dev/null; then
+              echo "Backend OK"; exit 0
+            fi
+            echo "Esperando backend… ($i)"; sleep 2
+          done
+          echo "Backend no respondió a tiempo"; exit 1
 
+      - name: Esperar FRONTEND (http://127.0.0.1:8058/)
+        run: |
+          for i in {1..40}; do
+            if curl -sSf http://127.0.0.1:8058/ > /dev/null; then
+              echo "Frontend OK"; exit 0
+            fi
+            echo "Esperando frontend… ($i)"; sleep 2
+          done
+          echo "Frontend no respondió a tiempo"; exit 1
 
       - name: Check chromedriver permissions
         run: |
-          ls -l /usr/bin/chromedriver
-          which chromedriver
-          
-      - name: Run tests
+          ls -l /usr/bin/chromedriver || true
+          which chromedriver || true
+
+      # Ejecuta TODOS los tests (incluye Selenium)
+      - name: Run tests (incluye Selenium)
         working-directory: AGRO_CLIMA_APP/
+        env:
+          API_URL: "http://127.0.0.1:8000"     # tests/backend
+          FRONTEND_URL: "http://127.0.0.1:8058" # tests/selenium
+          CI: "1"
         run: |
-          python -m pytest --cov=app tests/
+          python -m pytest --cov=app --cov-report=term-missing --cov-report=xml tests/
+
+      # Logs útiles si algo falla
+      - name: Dump backend logs (on failure)
+        if: failure()
+        run: |
+          echo "=== BACKEND/FRONTEND PIDs ==="
+          pgrep -a python || true
+          echo "=== NOHUP LOGS (si existen) ==="
+          [ -f AGRO_CLIMA_APP/nohup.out ] && tail -n 300 AGRO_CLIMA_APP/nohup.out || true

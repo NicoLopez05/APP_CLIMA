@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.venv/
+.env
+
+# VCS / OS
+.git/
+.gitignore
+.DS_Store
+
+# Build / coverage
+build/
+dist/
+.coverage
+coverage.xml
+htmlcov/
+
+# Misc
+*.log
